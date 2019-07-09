@@ -1,0 +1,22 @@
+#!/usr/bin/env php
+<?php
+
+use MangoAPI\Request;
+use MangoAPI\Response;
+
+require_once 'vendor/autoload.php';
+
+$request = new Request();
+$request->addHeader("Access-Control-Allow-Origin", "*")
+		->addHeader("Content-Type", "application/json; charset=UTF-8")
+		->setAllowMethods(["GET", "POST", "PUT", "HEAD", "DELETE", "PATCH", "OPTIONS"])
+		->addHeader("Access-Control-Max-Age", "3600")
+		->addHeader("Access-Control-Allow-Credentials", "true")
+		->addHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+		->setHeaders();
+
+$response 	= new Response;
+$data 		= $request->getAllowMethods();
+$response->isOk("Successfully processed", $data)
+		->send()
+		->kill();
