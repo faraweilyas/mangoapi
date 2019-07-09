@@ -2,7 +2,7 @@
     "name": "faraweilyas/mangoapi",
     "type": "library",
     "description": "PHP library that provides an object-oriented wrapper to manage API requests.",
-    "keywords": ["mango", "api", "mangoapi", "mangoapi requests"],
+    "keywords": ["api-wrapper", "apis", "api", "mangoapi", "mango"],
     "homepage": "https://github.com/faraweilyas/mangoapi",
     "license": "MIT",
     "authors": [

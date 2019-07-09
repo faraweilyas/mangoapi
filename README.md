@@ -1,11 +1,10 @@
-# sshbunny
-PHP library that provides an object-oriented wrapper to connect to SSH and run shell commands with the php ssh2 extension.
+# mangoapi
+PHP library to handle API requests and send responses.
 
 # Requirements
 ------------
 
-- PHP version 5.3+
-- [SSH2 extension](http://www.php.net/manual/en/book.ssh2.php).
+- PHP version 7.0+
 - [composer](http://getcomposer.org).
 
 # Install with composer
@@ -13,107 +12,101 @@ PHP library that provides an object-oriented wrapper to connect to SSH and run s
 
 The best way to add the library to your project is using [composer](http://getcomposer.org).
 ```bash
-composer require faraweilyas/sshbunny
+composer require faraweilyas/mangoapi
 ```
 or
 
 # Clone this repo
 
 ```bash
-git clone https://github.com/faraweilyas/sshbunny.git
+git clone https://github.com/faraweilyas/mangoapi.git
 ```
-
-# Configuration
--------------
-
-`SSHBunny` constructor takes four parameters and they all have default values `$method='local'`, `$authType=NULL`, `$host=NULL`, `$port=22`, `$username=NULL`
-
- - `$method` can be set to `local` or `remote`, `local` will execute commands on your own shell without internet connection while `remote` executes commands on the remote server that you connect to based on your configuration.
- - `$authType` can be set to `KEY`, `PASSWORD` or `KEY_PASSWORD`, `KEY` and `KEY_PASSWORD` uses [ssh2_auth_pubkey_file](http://php.net/manual/en/function.ssh2-auth-pubkey-file.php) the difference is when you set `$authType='KEY_PASSWORD'` ssh2_auth_pubkey_file takes the last parameter of password which will now be required and `PASSWORD` uses [ssh2_auth_password](http://php.net/manual/en/function.ssh2-auth-password.php).
- - `$port` should be set to your server port if your are connecting to a remote server.
- - `$username` should be set to your server username.
-
-if your are setting connection method to `$method='remote'` and `$authType = KEY || KEY_PASSWORD` that means you will need to set your public & private key file which you can do with the setters `SSHBunny` has `$sshBunny->setKeys('public_key.pub', 'private_key')` before initialization.
 
 # Basic usage
 -------------
-This is just going to run locally since connection method is set to `local`
 ```php
 <?php
 
-use SSHBunny\SSHBunny;
+use MangoAPI\Request;
+use MangoAPI\Response;
 
 require_once 'vendor/autoload.php';
 
-// ->getData() will return output of command executed while ->getData(TRUE) will dispay the output
-$sshBunny = (new SSHBunny('local'))
-    ->initialize()
-    ->exec("echo 'Hello World'")
-    ->getData(TRUE);
+// Handling request
+$request = new Request();
+$request->addHeader("Access-Control-Allow-Origin", "*")
+		->addHeader("Content-Type", "application/json; charset=UTF-8")
+		->setAllowMethods(["GET", "POST", "PUT", "HEAD", "DELETE", "PATCH", "OPTIONS"])
+		->addHeader("Access-Control-Max-Age", "3600")
+		->addHeader("Access-Control-Allow-Credentials", "true")
+		->addHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+		->setHeaders();
+
+// Make database calls or any other operations
+
+// Sending response
+$response 	= new Response;
+$data 		= ['username' => 'hadiza123', 'name' => 'Agbonoga Hadiza', 'sex' => 'female'];
+$response->isOk("Successfully processed", $data)
+		->send()
+		->kill();
+
 ```
 
-This is going connect to a remote server since connection method is set to `remote` and authentication type is set to `KEY`
+## Handling Request
 ```php
-<?php
+$request = new Request();
+// Add header 1
+$request->addHeader("Access-Control-Allow-Origin", "*");
+// Add header 2
+$request->addHeader("Access-Control-Max-Age", "3600");
+// Setting header
+$request->setHeaders();
 
-use SSHBunny\SSHBunny;
+// Get raw data from request
+$data = $request->getDataFromRequest();
 
-require_once 'vendor/autoload.php';
-
-defined('TEST_HOST')    ? NULL : define('TEST_HOST',    "138.222.15.1");
-defined('PORT')         ? NULL : define('PORT',         "22");
-defined('USERNAME')     ? NULL : define('USERNAME',     "ubuntu");
-defined('PUBLIC_KEY')   ? NULL : define('PUBLIC_KEY',   'id_ssl.pub');
-defined('PRIVATE_KEY')  ? NULL : define('PRIVATE_KEY',  'id_ssl');
-
-$sshBunny = (new SSHBunny('remote', 'KEY', HOST, PORT, USERNAME))
-    ->setKeys(PUBLIC_KEY, PRIVATE_KEY)
-    ->initialize()
-    ->exec("echo 'Hello World'")
-    ->getData(TRUE);
+// Get headers
+$headers = $request->getHeaders();
 ```
 
-Command execution can take multiple commands or you can chain on the `exec` method with another `exec` method
+## Sending Response
+
+- Send 200 ok response
 ```php
-$sshBunny = (new SSHBunny('remote', 'KEY', HOST, PORT, USERNAME))
-    ->setKeys(PUBLIC_KEY, PRIVATE_KEY)
-    ->initialize()
-    // Multiple commands
-    ->exec("echo 'Hello World'", "cd /var/www/html")
-    // Method chaining
-    ->exec("ls -la")
-    ->getData(TRUE);
+$response 	= new Response;
+$data 		= ['username' => 'hadiza123', 'name' => 'Agbonoga Hadiza', 'sex' => 'female'];
+$response->isOk("Successfully processed", $data)
+		->send()
+		->kill();
 ```
-
-## Available methods
-
-- Executed command output
+- Send 201 created response
 ```php
-// Will return the result of executed command output
-$sshBunny
-    ->exec("ls -la")
-    ->getData();
-// Will display the result of executed command output
-$sshBunny
-    ->exec("ls -la")
-    ->getData(TRUE);
+$response 	= new Response;
+$data 		= ['username' => 'hadiza123', 'name' => 'Agbonoga Hadiza', 'sex' => 'female'];
+$response->isCreated("Successfully created", $data)
+		->send()
+		->kill();
 ```
-
-- Clear stored executed command output
+- Send 400 bad request response
 ```php
-// Will clear the first executed command output and return the next executed command output
-$sshBunny
-    ->exec("ls -la")
-    ->clearData()
-    ->exec("whoami")
-    ->getData(TRUE);
+$response 	= new Response;
+$data 		= [];
+$response->badRequest("Request can't be processed", $data)
+		->send()
+		->kill();
 ```
-
-- Disconnect server connection
+- Send 404 not found response
 ```php
-// Will run the commands provided and display the result then disconnect from the server
-$sshBunny
-    ->exec("ls -la", "whoami")
-    ->getData(TRUE)
-    ->disconnect();
+$response 	= new Response;
+$response->notFound("Request not found")
+		->send()
+		->kill();
+```
+- Send 422 unprocessable entity response
+```php
+$response 	= new Response;
+$response->unProcessableEntityResponse()
+		->send()
+		->kill();
 ```

@@ -15,8 +15,10 @@ $request->addHeader("Access-Control-Allow-Origin", "*")
 		->addHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
 		->setHeaders();
 
+// Make database calls or any other operations
+
 $response 	= new Response;
-$data 		= $request->getAllowMethods();
+$data 		= ['username' => 'hadiza123', 'name' => 'Agbonoga Hadiza', 'sex' => 'female'];
 $response->isOk("Successfully processed", $data)
 		->send()
 		->kill();
